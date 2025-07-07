@@ -43,7 +43,11 @@ const global = {
     s1: "",
     s2: "",
   },
-  news_msg: "",
+  news_msg: {
+    tw: "",
+    jp: "",
+  },
   ANIMATION_DURATION: 200,
   check_eew: false,
+  newsAlertTimeoutId: null,
 };

@@ -15,7 +15,7 @@ by.miyashooooo											*
 ********************************************************/
 
 /**彈窗動畫**/
-function animateNews(msg, callback) {
+function animateNews(msg, callback, reportType = "台灣") {
   $newsAlertLi.text(msg);
   $newsAlert
     .css("display", "block")
@@ -42,7 +42,7 @@ function eew(eew_msg) {
       textAlign: "center",
     });
     setTimeout(function () {
-      $newsAlert.animate({ width: "175px" }, global.ANIMATION_DURATION);
+      $newsAlert.animate({ width: "255px" }, global.ANIMATION_DURATION);
       setTimeout(function () {
         global.check_eew = false;
         notice(notice_msg);
@@ -55,25 +55,49 @@ let marqueeCounter = 0;
 let endPos = 0;
 
 /**地震報告**/
-function news(msg) {
-  global.news_msg = msg;
-  const msgLength = global.news_msg.length;
+function news(msg, reportType = "台灣") {
+  if (reportType === "台灣") {
+    global.news_msg.tw = msg;
+  } else if (reportType === "日本") {
+    global.news_msg.jp = msg;
+  }
+
+  let currentMsg = "";
+  if (reportType === "台灣") {
+    currentMsg = global.news_msg.tw;
+  } else if (reportType === "日本") {
+    currentMsg = global.news_msg.jp;
+  }
+
+  const msgLength = currentMsg.length;
   const endPosition = -msgLength * 29;
   addStyle(endPosition);
   const pixelsPerSecond = 50;
   const animationDuration = (msgLength * 11) / pixelsPerSecond;
-  animateNews("地震報告", function () {
-    $containerLi.text(global.news_msg);
-    $containerUl.css("display", "block");
-    setTimeout(function () {
-      resetMarquee();
-      $containerUl.css(
-        "animation",
-        `scroll ${animationDuration}s infinite linear`
-      );
-      $newsAlert.animate({ width: "175px" }, global.ANIMATION_DURATION);
-    }, 2000);
-  });
+
+  const showReportType = global.news_msg.jp !== ""; // Check if jmaReport is present
+  const alertTitle = showReportType ? `地震報告[${reportType}]` : `地震報告`;
+  const alertWidth = showReportType ? "255px" : "175px";
+
+  animateNews(
+    alertTitle,
+    function () {
+      $containerLi.text(currentMsg);
+      $containerUl.css("display", "block");
+      if (global.newsAlertTimeoutId) {
+        clearTimeout(global.newsAlertTimeoutId);
+      }
+      global.newsAlertTimeoutId = setTimeout(function () {
+        resetMarquee();
+        $containerUl.css(
+          "animation",
+          `scroll ${animationDuration}s infinite linear`
+        );
+        $newsAlert.animate({ width: alertWidth }, global.ANIMATION_DURATION);
+      }, 2000);
+    },
+    reportType
+  );
 }
 
 let counter = 0;
@@ -81,8 +105,21 @@ let counter = 0;
 /**跑馬燈事件**/
 $containerUl.on("animationiteration", function () {
   counter++;
-  if (counter % 3 == 0) {
-    news(global.news_msg);
+  if (counter % 3 === 0) {
+    if (global.news_msg.tw && global.news_msg.jp) {
+      if (marqueeCounter % 2 === 0) {
+        news(global.news_msg.tw, "台灣");
+      } else {
+        news(global.news_msg.jp, "日本");
+      }
+      marqueeCounter++;
+    } else if (global.news_msg.tw) {
+      news(global.news_msg.tw, "台灣");
+    } else if (global.news_msg.jp) {
+      news(global.news_msg.jp, "日本");
+    } else {
+      notice(notice_msg);
+    }
   } else {
     notice(notice_msg);
   }

@@ -1,7 +1,7 @@
-const wsURL = "wss://bcl666.live:5278/eew";
+const wsURL = "wss://eew.bcl666.live/";
 let ws;
 
-const API_KEY = "bWl5YXNob29vb29fdGVzdAJasperx";
+const API_KEY = "金鑰貼這裡";
 
 function connectWebSocket() {
   ws = new WebSocket(wsURL);
@@ -11,6 +11,7 @@ function connectWebSocket() {
     sendWebSocketMessage({ type: "eew", token: API_KEY });
     sendWebSocketMessage({ type: "rts", token: API_KEY });
     sendWebSocketMessage({ type: "report", token: API_KEY });
+    sendWebSocketMessage({ type: "jmaReport", token: API_KEY });
     sendWebSocketMessage({ type: "station", token: API_KEY });
   });
 
@@ -40,6 +41,9 @@ function connectWebSocket() {
       case "forbidden":
         alert("錯誤的金鑰");
         break;
+      case "jmaReport":
+        news(reportFormat(data), "日本");
+        break;
       default:
         EEWRequest(data);
         break;
@@ -64,29 +68,78 @@ function sendWebSocketMessage(t) {
 }
 
 function reportFormat(data) {
-  global.report.message = "";
-  const loc = data.loc;
-  const dep = data.depth;
-  const mag = data.mag;
-  const time = formatTimestamp(data.time);
-  const list = data.list;
+  const type = data.t;
+  let timeStamp = data.time;
 
-  for (const city in list) {
-    if (list.hasOwnProperty(city)) {
-      global.report.message += `${city}：`;
-      const townObject = list[city].town;
-      for (const town in townObject) {
-        if (townObject.hasOwnProperty(town)) {
-          const townDetails = townObject[town];
-          global.report.message += `${town}${townDetails.int}級、`;
-        }
-      }
-      global.report.message = global.report.message.slice(0, -1);
-      global.report.message += "。";
-    }
+  if (type === "jmaReport") {
+    timeStamp += 9 * 3600 * 1000;
+  } else if (type === "report") {
+    timeStamp += 8 * 3600 * 1000;
   }
 
-  return `臺灣時間${time}左右發生規模${mag}地震，震央位於${loc}，深度${dep}公里，各地震度『${global.report.message}』，更多詳細的地震資訊請參閱中央氣象署網站。`;
+  const time = formatTimestamp(timeStamp);
+  const loc = data.loc;
+  const mag = data.mag;
+  const depth = data.depth;
+  const list = data.list;
+
+  let currentMaxInt = 0;
+
+  global.report.message = "";
+
+  // 通用處理 list 的輔助函式
+  const processList = (listData, isJmaReport) => {
+    let localMaxInt = 0;
+    let tempMessage = "";
+
+    for (const key in listData) {
+      if (listData.hasOwnProperty(key)) {
+        const keyData = listData[key];
+
+        if (isJmaReport && keyData.int && keyData.int > localMaxInt) {
+          localMaxInt = keyData.int;
+        }
+
+        tempMessage += `${key}：`;
+        const townObject = keyData.town;
+        for (const townKey in townObject) {
+          if (townObject.hasOwnProperty(townKey)) {
+            const townDetails = townObject[townKey];
+            if (isJmaReport) {
+              tempMessage += `${townKey}震度${townDetails.int}、`;
+              if (townDetails.int > localMaxInt) {
+                localMaxInt = townDetails.int;
+              }
+            } else {
+              tempMessage += `${townKey}${townDetails.int}級、`;
+            }
+          }
+        }
+        tempMessage = tempMessage.slice(0, -1);
+        tempMessage += "。";
+      }
+    }
+    if (tempMessage.endsWith("。")) {
+      tempMessage = tempMessage.slice(0, -1);
+    }
+
+    return { message: tempMessage, maxInt: localMaxInt };
+  };
+
+  const processed = processList(list, type === "jmaReport");
+  global.report.message = processed.message;
+  currentMaxInt = processed.maxInt;
+
+  if (type === "jmaReport") {
+    const intensityDetail = global.report.message
+      ? `各地の震度は『${global.report.message}』です。`
+      : "";
+
+    return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${currentMaxInt}です。${intensityDetail}詳しくは気象庁のウェブサイトをご覧ください。`;
+  } else if (type === "report") {
+    return `臺灣時間${time}左右發生規模${mag}地震，震央位於${loc}，深度${depth}公里，各地震度『${global.report.message}』，更多詳細的地震資訊請參閱中央氣象署網站。`;
+  }
+  return `未知類型的報告。時間：${time}`;
 }
 
 function addStyle(endPosition) {
