@@ -77,7 +77,21 @@ function news(msg, reportType = "台灣") {
 
   const showReportType = global.news_msg.jp !== ""; // Check if jmaReport is present
   const alertTitle = showReportType ? `地震報告[${reportType}]` : `地震報告`;
-  const alertWidth = showReportType ? "255px" : "175px";
+
+  const dummyElement = $("<span>")
+    .css({
+      "font-size": "2rem",
+      "font-weight": "bold",
+      "white-space": "nowrap",
+      padding: "10px 24px",
+      position: "absolute",
+      visibility: "hidden",
+    })
+    .text(alertTitle)
+    .appendTo("body");
+
+  const alertWidth = `${dummyElement.outerWidth()}px`;
+  dummyElement.remove();
 
   animateNews(
     alertTitle,
