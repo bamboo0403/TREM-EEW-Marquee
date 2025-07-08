@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
   if (resetBtn) {
     resetBtn.addEventListener("click", function () {
-      colorInput.value = "#f00";
+      colorInput.value = "#ff0000";
       document.querySelectorAll(".news_alert").forEach((el) => {
         el.style.background = null;
       });
