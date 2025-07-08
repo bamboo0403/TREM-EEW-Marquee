@@ -1,3 +1,82 @@
+:root {
+  --background-color: #ffffff;
+  --text-color: #494949;
+  --container-bg: #fff;
+  --border-color: #b8b8b8;
+  --button-bg: #f0f0f0;
+  --button-hover-bg: #e0e0e0;
+  --select-bg: #ffffff;
+}
+
+
+[data-theme="dark"] {
+  --background-color: #202020;
+  --text-color: #ffffff;
+  --container-bg: #202020;
+  --border-color: #404040;
+  --button-bg: #2d2d2d;
+  --button-hover-bg: #404040;
+  --select-bg: #2d2d2d;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+  background-color: var(--button-hover-bg);
+}
+
+select {
+  background-color: var(--select-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+select:hover {
+  border-color: var(--text-color);
+}
+
+label {
+  color: var(--text-color);
+  margin-right: 8px;
+}
+
+.theme-toggle {
+  margin-left: 10px;
+}
+
+.theme-toggle {
+  background-color: var(--button-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.theme-toggle:hover {
+  opacity: 0.9;
+}
+
 .news-container {
   position: fixed;
   top: 0;
@@ -5,7 +84,7 @@
   right: 0;
   font-family: "Roboto", sans-serif;
   box-shadow: 0 4px 8px -4px rgba(0, 0, 0, 0.3);
-  background: #fff;
+  background: var(--container-bg);
 }
 
 .news-container ul {
@@ -18,7 +97,7 @@
 .news-container ul li {
   white-space: nowrap;
   padding: 10px 24px;
-  color: #494949;
+  color: var(--text-color);
   position: relative;
   font-weight: bold;
   font-size: 2rem;
@@ -30,7 +109,7 @@
   content: "";
   width: 1px;
   height: 100%;
-  background: #b8b8b8;
+  background: var(--border-color);
   position: absolute;
   top: 0;
   right: 0;
