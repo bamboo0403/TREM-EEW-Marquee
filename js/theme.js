@@ -6,6 +6,18 @@ function setThemeToggleText(theme) {
   } else {
     btn.textContent = "切換護眼模式";
   }
+  if (!localStorage.getItem("newsAlertColor")) {
+    const colorInput = document.getElementById("alertColorPicker");
+    const colorText = document.getElementById("alertColorText");
+    if (colorInput && colorText) {
+      const defaultColor = theme === "dark" ? "#b90909" : "#ff0000";
+      colorInput.value = defaultColor;
+      colorText.value = defaultColor;
+      document.querySelectorAll(".news_alert").forEach((el) => {
+        el.style.background = null;
+      });
+    }
+  }
 }
 
 const currentTheme = localStorage.getItem("theme");
