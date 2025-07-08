@@ -1,80 +1,20 @@
-:root {
-  --background-color: #ffffff;
-  --text-color: #494949;
-  --container-bg: #fff;
-  --border-color: #b8b8b8;
-  --button-bg: #f0f0f0;
-  --button-hover-bg: #e0e0e0;
-  --select-bg: #ffffff;
+@import url("https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&family=Huninn:wght@400;700&display=swap");
+
+body,
+.container,
+.light,
+.dark {
+  font-family: "Huninn", "Zen Maru Gothic", "Noto Sans TC", "Noto Sans JP",
+    "Microsoft JhengHei", "PingFang TC", "Heiti TC", "sans-serif";
 }
 
-
-[data-theme="dark"] {
-  --background-color: #202020;
-  --text-color: #ffffff;
-  --container-bg: #202020;
-  --border-color: #404040;
-  --button-bg: #2d2d2d;
-  --button-hover-bg: #404040;
-  --select-bg: #2d2d2d;
-}
-
-body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  transition: background-color 0.3s, color 0.3s;
-}
-
-button {
-  background-color: var(--button-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s, color 0.3s;
-}
-
-button:hover {
-  background-color: var(--button-hover-bg);
-}
-
-select {
-  background-color: var(--select-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-select:hover {
-  border-color: var(--text-color);
-}
-
-label {
-  color: var(--text-color);
-  margin-right: 8px;
-}
-
-.theme-toggle {
-  margin-left: 10px;
-}
-
-.theme-toggle {
-  background-color: var(--button-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 10px;
-}
-
-.theme-toggle:hover {
-  opacity: 0.9;
+h1,
+h2,
+h3,
+.title {
+  font-family: "Zen Maru Gothic", "Huninn", "Noto Sans TC", "Noto Sans JP",
+    "sans-serif";
+  letter-spacing: 1.5px;
 }
 
 .news-container {
@@ -82,9 +22,11 @@ label {
   top: 0;
   left: 0;
   right: 0;
-  font-family: "Roboto", sans-serif;
   box-shadow: 0 4px 8px -4px rgba(0, 0, 0, 0.3);
-  background: var(--container-bg);
+  background: #fff;
+  min-height: 66px;
+  display: flex;
+  align-items: center;
 }
 
 .news-container ul {
@@ -94,22 +36,23 @@ label {
   animation: scroll 25s infinite linear;
 }
 
-.news-container ul li {
+.news-container div {
   white-space: nowrap;
   padding: 10px 24px;
-  color: var(--text-color);
+  color: #494949;
   position: relative;
   font-weight: bold;
   font-size: 2rem;
   left: 1em;
-  height: 48px;
+  height: 100%;
+  width: 100%;
 }
 
 .news-container ul li::after {
   content: "";
   width: 1px;
   height: 100%;
-  background: var(--border-color);
+  background: #b8b8b8;
   position: absolute;
   top: 0;
   right: 0;
@@ -125,7 +68,7 @@ label {
   margin: 0;
 }
 
-.news_alert ul li {
+.news_alert div {
   white-space: nowrap;
   padding: 10px 24px;
   color: #ffffff;
@@ -133,6 +76,8 @@ label {
   font-weight: bold;
   font-size: 2rem;
   text-align: center;
+  width: 100%;
+  height: 100%;
 }
 
 .news_alert {
@@ -142,12 +87,144 @@ label {
   top: 0;
   left: 0;
   right: 0;
-  font-family: "Roboto", sans-serif;
   box-shadow: 0 4px 8px -4px rgba(0, 0, 0, 0.3);
   z-index: 999;
   width: 175px;
+  min-height: 66px;
+  align-items: center;
 }
 
+button,
 .btn {
-  margin-top: 5vw;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  transition: background 0.2s, color 0.2s;
+}
+button:hover,
+.btn:hover {
+  background: #1565c0;
+}
+
+select {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #bdbdbd;
+  font-size: 1.05rem;
+  background: #fafafa;
+  color: #222;
+  margin: 0 8px 8px 0;
+  transition: border 0.2s, background 0.2s;
+}
+select:focus {
+  border: 1.5px solid #1976d2;
+  outline: none;
+}
+
+label {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-right: 8px;
+  color: #1976d2;
+}
+
+p,
+.time,
+.max_gal,
+.epic_intensity,
+.notification,
+.location_intensity_1,
+.location_intensity_2,
+.station_1_shindo,
+.station_2_shindo {
+  font-size: 1.1rem;
+  margin: 6px 0;
+  letter-spacing: 0.5px;
+}
+
+/* dark theme for UI元件 */
+.dark button,
+.dark .btn {
+  background: #263859;
+  color: #fff;
+}
+.dark button:hover,
+.dark .btn:hover {
+  background: #1b253b;
+}
+.dark select {
+  background: #232323;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+.dark select:focus {
+  border: 1.5px solid #90caf9;
+}
+.dark label {
+  color: #90caf9;
+}
+.dark p,
+.dark .time,
+.dark .max_gal,
+.dark .epic_intensity,
+.dark .notification,
+.dark .location_intensity_1,
+.dark .location_intensity_2,
+.dark .station_1_shindo,
+.dark .station_2_shindo {
+  color: #e0e0e0;
+}
+
+.light,
+.light body,
+.light .container {
+  background: #fff;
+  color: #222;
+}
+.dark,
+.dark body,
+.dark .container {
+  background: #181818;
+  color: #e0e0e0;
+  user-select: none;
+}
+
+.dark .news-container {
+  background: #181818;
+}
+
+.dark .news-container div {
+  color: #fff;
+}
+
+.dark .news_alert {
+  background: #b90909;
+}
+
+.container {
+  margin-bottom: 5rem;
+}
+
+.roboto-font,
+.roboto-font body,
+.roboto-font .container,
+.roboto-font .light,
+.roboto-font .dark {
+  font-family: "Roboto", "Noto Sans TC", "Noto Sans JP", "Microsoft JhengHei",
+    "PingFang TC", "Heiti TC", "sans-serif" !important;
+}
+
+.cute-font,
+.cute-font body,
+.cute-font .container,
+.cute-font .light,
+.cute-font .dark {
+  font-family: "Huninn", "Zen Maru Gothic", "Noto Sans TC", "Noto Sans JP",
+    "Microsoft JhengHei", "PingFang TC", "Heiti TC", "sans-serif" !important;
 }
