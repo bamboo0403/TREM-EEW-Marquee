@@ -6,6 +6,18 @@ function setThemeToggleText(theme) {
   } else {
     btn.textContent = "切換護眼模式";
   }
+  if (!localStorage.getItem("newsAlertColor")) {
+    const colorInput = document.getElementById("alertColorPicker");
+    const colorText = document.getElementById("alertColorText");
+    if (colorInput && colorText) {
+      const defaultColor = theme === "dark" ? "#b90909" : "#ff0000";
+      colorInput.value = defaultColor;
+      colorText.value = defaultColor;
+      document.querySelectorAll(".news_alert").forEach((el) => {
+        el.style.background = null;
+      });
+    }
+  }
 }
 
 const currentTheme = localStorage.getItem("theme");
@@ -59,25 +71,46 @@ function applyFontFamily(isCute) {
 
 document.addEventListener("DOMContentLoaded", function () {
   const colorInput = document.getElementById("alertColorPicker");
+  const colorText = document.getElementById("alertColorText");
   const resetBtn = document.getElementById("resetAlertColor");
-  if (!colorInput) return;
+  if (!colorInput || !colorText) return;
   const savedColor = localStorage.getItem("newsAlertColor");
   if (savedColor) {
     colorInput.value = savedColor;
+    colorText.value = savedColor;
     document.querySelectorAll(".news_alert").forEach((el) => {
       el.style.background = savedColor;
     });
+  } else {
+    colorText.value = colorInput.value;
   }
+  // 選色器改變時，更新文字框與顏色
   colorInput.addEventListener("input", function (e) {
     const color = e.target.value;
+    colorText.value = color;
     document.querySelectorAll(".news_alert").forEach((el) => {
       el.style.background = color;
     });
     localStorage.setItem("newsAlertColor", color);
   });
+  // 文字框改變時，更新選色器與顏色
+  colorText.addEventListener("input", function (e) {
+    let color = e.target.value;
+    if (!color.startsWith("#")) color = "#" + color;
+    if (/^#[0-9a-fA-F]{6}$/.test(color) || /^#[0-9a-fA-F]{3}$/.test(color)) {
+      colorInput.value = color;
+      document.querySelectorAll(".news_alert").forEach((el) => {
+        el.style.background = color;
+      });
+      localStorage.setItem("newsAlertColor", color);
+    }
+  });
   if (resetBtn) {
     resetBtn.addEventListener("click", function () {
-      colorInput.value = "#f00";
+      const isDark = document.documentElement.classList.contains("dark");
+      const defaultColor = isDark ? "#b90909" : "#ff0000";
+      colorInput.value = defaultColor;
+      colorText.value = defaultColor;
       document.querySelectorAll(".news_alert").forEach((el) => {
         el.style.background = null;
       });

@@ -82,7 +82,7 @@ h3,
 
 .news_alert {
   display: none;
-  background: #f00;
+  background: #ff0000;
   position: fixed;
   top: 0;
   left: 0;
@@ -227,4 +227,46 @@ p,
 .cute-font .dark {
   font-family: "Huninn", "Zen Maru Gothic", "Noto Sans TC", "Noto Sans JP",
     "Microsoft JhengHei", "PingFang TC", "Heiti TC", "sans-serif" !important;
+}
+
+input[type="color"] {
+  border: none;
+  background: none;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 8px;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+input#alertColorText {
+  width: 90px;
+  height: 45px;
+  vertical-align: middle;
+  margin: 0 8px;
+  text-align: center;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: 1px solid #bdbdbd;
+  background: #fafafa;
+  color: #222;
+  transition: border 0.2s, background 0.2s;
+  text-transform: uppercase;
+}
+.dark input#alertColorText {
+  background: #232323;
+  color: #e0e0e0;
+  border: 1px solid #444;
+}
+.dark input#alertColorText:focus {
+  border: 1.5px solid #90caf9;
 }
