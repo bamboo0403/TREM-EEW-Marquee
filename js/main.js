@@ -7,14 +7,12 @@ class StationManager {
   }
 
   SelectStation() {
-    const Station1Select = $(".station_1");
-    const Station2Select = $(".station_2");
     const sortedKeys = Object.keys(this.GlobalManager.station).sort((a, b) => {
       const uuidA = this.GlobalManager.station[a].uuid.split("-")[1];
       const uuidB = this.GlobalManager.station[b].uuid.split("-")[1];
       return uuidA.localeCompare(uuidB);
     });
-    sortedKeys.forEach((key) => {
+    this.stationOptions = sortedKeys.map((key) => {
       const stations = this.GlobalManager.station[key];
       if (key == "13379360") {
         stations.Loc = "重慶市 北碚區";
@@ -22,20 +20,23 @@ class StationManager {
         stations.Loc = "南楊州市 和道邑";
       }
       const lastThreeKeys = key.slice(-3);
-      const option = $("<option>")
-        .val(stations.uuid)
-        .text(`${stations.Loc} (${lastThreeKeys})`);
-      Station1Select.append(option.clone());
-      Station2Select.append(option);
+      return {
+        uuid: stations.uuid,
+        label: `${stations.Loc} (${lastThreeKeys})`,
+        Loc: stations.Loc,
+        key: key,
+      };
     });
     const rts1 = sessionStorage.getItem("rts1");
+    const rts2 = sessionStorage.getItem("rts2");
     if (rts1) {
-      Station1Select.val(rts1);
+      const found = this.stationOptions.find((opt) => opt.uuid === rts1);
+      if (found) $(".station_1_search").val(found.label);
       this.GlobalManager.setting.rts1 = rts1;
     }
-    const rts2 = sessionStorage.getItem("rts2");
     if (rts2) {
-      Station2Select.val(rts2);
+      const found = this.stationOptions.find((opt) => opt.uuid === rts2);
+      if (found) $(".station_2_search").val(found.label);
       this.GlobalManager.setting.rts2 = rts2;
     }
   }
@@ -254,16 +255,119 @@ class StationManager {
   }
 
   setupEventListeners() {
-    $(document).on("change", ".station_1", (event) => {
-      const SelectedStation = $(event.target).val();
-      this.GlobalManager.setting.rts1 = SelectedStation;
-      sessionStorage.setItem("rts1", SelectedStation);
+    $(document).on("input focus", ".station_1_search", (event) => {
+      const val = $(event.target).val().toLowerCase();
+      let matched = [];
+      if (/^\d+/.test(val)) {
+        matched = this.stationOptions.filter(
+          (opt) =>
+            opt.uuid.toLowerCase().includes(val) ||
+            opt.key.startsWith(val) ||
+            opt.label.toLowerCase().includes(val)
+        );
+        matched.sort((a, b) => {
+          const aStart =
+            a.uuid.toLowerCase().startsWith(val) || a.key.startsWith(val);
+          const bStart =
+            b.uuid.toLowerCase().startsWith(val) || b.key.startsWith(val);
+          if (aStart && !bStart) return -1;
+          if (!aStart && bStart) return 1;
+          return 0;
+        });
+      } else {
+        matched = this.stationOptions.filter(
+          (opt) =>
+            opt.label.toLowerCase().includes(val) ||
+            opt.uuid.toLowerCase().includes(val) ||
+            opt.key.includes(val)
+        );
+      }
+      const dropdown = $(".station_1_dropdown");
+      dropdown.empty();
+      if (matched.length > 0 && val.length > 0) {
+        matched.forEach((opt) => {
+          dropdown.append(
+            `<div class='dropdown-item' data-uuid='${opt.uuid}'>${opt.label}</div>`
+          );
+        });
+        dropdown.addClass("active");
+      } else {
+        dropdown.removeClass("active");
+      }
     });
-
-    $(document).on("change", ".station_2", (event) => {
-      const SelectedStation = $(event.target).val();
-      this.GlobalManager.setting.rts2 = SelectedStation;
-      sessionStorage.setItem("rts2", SelectedStation);
+    $(document).on(
+      "mousedown",
+      ".station_1_dropdown .dropdown-item",
+      (event) => {
+        const uuid = $(event.target).data("uuid");
+        const label = $(event.target).text();
+        $(".station_1_search").val(label);
+        this.GlobalManager.setting.rts1 = uuid;
+        sessionStorage.setItem("rts1", uuid);
+        $(".station_1_dropdown").removeClass("active");
+      }
+    );
+    $(document).on("blur", ".station_1_search", (event) => {
+      setTimeout(() => {
+        $(".station_1_dropdown").removeClass("active");
+      }, 150);
+    });
+    $(document).on("input focus", ".station_2_search", (event) => {
+      const val = $(event.target).val().toLowerCase();
+      let matched = [];
+      if (/^\d+/.test(val)) {
+        matched = this.stationOptions.filter(
+          (opt) =>
+            opt.uuid.toLowerCase().includes(val) ||
+            opt.key.startsWith(val) ||
+            opt.label.toLowerCase().includes(val)
+        );
+        matched.sort((a, b) => {
+          const aStart =
+            a.uuid.toLowerCase().startsWith(val) || a.key.startsWith(val);
+          const bStart =
+            b.uuid.toLowerCase().startsWith(val) || b.key.startsWith(val);
+          if (aStart && !bStart) return -1;
+          if (!aStart && bStart) return 1;
+          return 0;
+        });
+      } else {
+        matched = this.stationOptions.filter(
+          (opt) =>
+            opt.label.toLowerCase().includes(val) ||
+            opt.uuid.toLowerCase().includes(val) ||
+            opt.key.includes(val)
+        );
+      }
+      const dropdown = $(".station_2_dropdown");
+      dropdown.empty();
+      if (matched.length > 0 && val.length > 0) {
+        matched.forEach((opt) => {
+          dropdown.append(
+            `<div class='dropdown-item' data-uuid='${opt.uuid}'>${opt.label}</div>`
+          );
+        });
+        dropdown.addClass("active");
+      } else {
+        dropdown.removeClass("active");
+      }
+    });
+    $(document).on(
+      "mousedown",
+      ".station_2_dropdown .dropdown-item",
+      (event) => {
+        const uuid = $(event.target).data("uuid");
+        const label = $(event.target).text();
+        $(".station_2_search").val(label);
+        this.GlobalManager.setting.rts2 = uuid;
+        sessionStorage.setItem("rts2", uuid);
+        $(".station_2_dropdown").removeClass("active");
+      }
+    );
+    $(document).on("blur", ".station_2_search", (event) => {
+      setTimeout(() => {
+        $(".station_2_dropdown").removeClass("active");
+      }, 150);
     });
   }
 }

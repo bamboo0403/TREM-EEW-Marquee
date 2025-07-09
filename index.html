@@ -35,10 +35,22 @@
 
 <div style="margin-top: 1vw">
   <label>測站1</label>
-  <select class="station_1"></select>
+  <input
+    type="text"
+    class="station_1_search"
+    autocomplete="off"
+    placeholder="搜尋地區或測站編號..."
+  />
+  <div class="station_1_dropdown dropdown-list"></div>
   <p></p>
   <label>測站2</label>
-  <select class="station_2"></select>
+  <input
+    type="text"
+    class="station_2_search"
+    autocomplete="off"
+    placeholder="搜尋地區或測站編號..."
+  />
+  <div class="station_2_dropdown dropdown-list"></div>
 </div>
 
 <div style="margin-top: 1vw">
@@ -56,7 +68,7 @@
     value="#ff0000"
     autocomplete="off"
   />
-  <button type="button" id="resetAlertColor" style="margin-left: 0;">
+  <button type="button" id="resetAlertColor" style="margin-left: 0">
     恢復預設
   </button>
 </div>
