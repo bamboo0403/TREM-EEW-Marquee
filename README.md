@@ -1,6 +1,7 @@
 # EEW 跑馬燈程式
 
-![image](https://github.com/user-attachments/assets/9b0bfb16-0314-4554-b677-76b7bf3066a2)
+![image](https://github.com/user-attachments/assets/8942befd-11dd-4f68-82a6-52b3536b1138)
+
 
 
 此程式採用 TREM 二次創作，最終版權歸屬 **ExpTech Studio 團隊**，請務必詳閱使用規則，且尊重原創作者。  
