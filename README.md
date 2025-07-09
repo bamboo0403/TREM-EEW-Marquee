@@ -1,6 +1,7 @@
 # EEW 跑馬燈程式
 
-![image](https://i.ibb.co/xsS1SJ9/eew-marquee-screen.png)
+![image](https://github.com/user-attachments/assets/9b0bfb16-0314-4554-b677-76b7bf3066a2)
+
 
 此程式採用 TREM 二次創作，最終版權歸屬 **ExpTech Studio 團隊**，請務必詳閱使用規則，且尊重原創作者。  
 如果您要使用此程式，請聯繫 Discord: `miyashooooo` 申請金鑰。此金鑰僅限於本人使用，若經查證與其他人共同使用金鑰，將會直接終止使用權。  
