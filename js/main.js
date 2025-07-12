@@ -251,7 +251,12 @@ class StationManager {
       $(".station_2_shindo").text(`，實測震度：0，距離震央：-km`);
     }, 40000);
 
-    this.Marquee.eew(this.Marquee.eew_initial_msg);
+    this.Marquee.eew(this.Marquee.eew_initial_msg, "地震速報");
+  }
+
+  on_eew_jp(data) {
+    if (data.type !== "eew-jma") return;
+    this.Marquee.eew(this.Marquee.eew_initial_msg_jp, "日本地震速報");
   }
 
   setupEventListeners() {

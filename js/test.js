@@ -27,6 +27,29 @@ class TestEEWManager {
     };
     this.Station.on_eew(eew_data, "websocket");
   }
+
+  eew_test_jp() {
+    const eew_data = {
+      t: "jmaEEW",
+      author: "jma",
+      type: "eew-jma",
+      id: "20250712005905",
+      serial: 4,
+      status: 1,
+      final: true,
+      eq: {
+        time: 1752249539000,
+        lon: 141.9,
+        lat: 37.3,
+        depth: 40,
+        mag: 3.5,
+        loc: "福島県沖",
+        max: 1,
+      },
+      time: 1752249602000,
+    };
+    this.Station.on_eew_jp(eew_data);
+  }
 }
 
 window.TestEEWManager = new TestEEWManager(window.StationManager);

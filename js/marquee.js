@@ -1,11 +1,3 @@
-/********************************************************
-	此代碼需搭配WS或者拉EWW，請自行設定執行函數傳入參數，例如:	*
-	eew('這是地震速報');									*
-	news('這是地震報告');									*
-	notice('這是公告');									*
-by.miyashooooo											*
-********************************************************/
-
 class MarqueeManager {
   constructor(GlobalManager) {
     this.GlobalManager = GlobalManager;
@@ -14,6 +6,7 @@ class MarqueeManager {
     this.$containerDiv = $(".news-container div");
     this.eew_initial_msg =
       "目前發生有感地震，慎防強烈搖晃，就近避難 [趴下、掩護、穩住]";
+    this.eew_initial_msg_jp = "緊急地震速報です、強い揺れに注意してください";
     this.notice_initial_msg =
       "地震無法有效預測，請勿在聊天室發表、轉載、引用或暗喻任何有關地震預測相關言論或文章，以免觸犯氣象法或是社會秩序維護法，也禁止討論任何政治議題，若有不當留言或名稱將直接刪除或封鎖。";
     this.marqueeCounter = 0;
@@ -30,13 +23,13 @@ class MarqueeManager {
       });
   }
 
-  eew(eew_msg) {
+  eew(eew_msg, type) {
     if (this.GlobalManager.check_eew) return;
     this.GlobalManager.check_eew = true;
     this.$containerDiv.text("");
     const endPosition = -eew_msg.length * 20;
     this.addStyle(endPosition);
-    this.animateNews("地震速報", () => {
+    this.animateNews(type, () => {
       this.$containerDiv.text(eew_msg);
       this.$containerDiv.css({
         animation: "unset",

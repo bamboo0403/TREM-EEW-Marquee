@@ -16,6 +16,7 @@ class WebSocketManager {
       this.sendWebSocketMessage({ type: "region", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "rts", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "eew", token: this.API_KEY });
+      this.sendWebSocketMessage({ type: "jmaEEW", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "report", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "jmaReport", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "station", token: this.API_KEY });
@@ -75,6 +76,9 @@ class WebSocketManager {
         setTimeout(() => {
           this.Marquee.news(this.GlobalManager.news_msg.jp, "日本");
         }, 0);
+        break;
+      case "jmaEEW":
+        this.Station.on_eew_jp(data);
         break;
       default:
         if (this.Station) {
