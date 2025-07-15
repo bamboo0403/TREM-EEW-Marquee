@@ -23,9 +23,9 @@ class MarqueeManager {
       });
   }
 
-  eew(eew_msg, type) {
-    if (this.GlobalManager.check_eew) return;
-    this.GlobalManager.check_eew = true;
+  eew(eew_msg, type, id) {
+    if (this.GlobalManager.check_eew[id]) return;
+    this.GlobalManager.check_eew[id] = true;
     this.$containerDiv.text("");
     const endPosition = -eew_msg.length * 20;
     this.addStyle(endPosition);
@@ -36,13 +36,14 @@ class MarqueeManager {
         display: "block",
         textAlign: "center",
       });
+      console.log(this.GlobalManager.check_eew[id]);
       setTimeout(() => {
         this.$newsAlert.animate(
           { width: "255px" },
           this.GlobalManager.ANIMATION_DURATION
         );
         setTimeout(() => {
-          this.GlobalManager.check_eew = false;
+          this.GlobalManager.check_eew[id] = false;
           this.notice(this.notice_initial_msg);
         }, 25000);
       }, 2000);

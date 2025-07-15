@@ -60,7 +60,7 @@ class GlobalManager {
       jp: "",
     };
     this.ANIMATION_DURATION = 200;
-    this.check_eew = false;
+    this.check_eew = {};
     this.newsAlertTimeoutId = null;
     this.marqueeQueue = [];
     this.isMarqueeRunning = false;
