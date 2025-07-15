@@ -55,9 +55,9 @@ class FunctionHandler {
     return now.getTime();
   }
 
-  formatTimestamp(timestamp) {
+  formatTimestamp(timestamp, type) {
     const date = new Date(timestamp);
-    date.setUTCHours(date.getUTCHours() + 8);
+    date.setUTCHours(date.getUTCHours() + (type === "report" ? 8 : 9));
     const year = date.getUTCFullYear();
     const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
     const day = date.getUTCDate().toString().padStart(2, "0");
@@ -168,12 +168,7 @@ class FunctionHandler {
   reportFormat(data) {
     const type = data.t;
     let timeStamp = data.time;
-    if (type === "jmaReport") {
-      timeStamp += 9 * 3600 * 1000;
-    } else if (type === "report") {
-      timeStamp += 8 * 3600 * 1000;
-    }
-    const time = this.formatTimestamp(timeStamp);
+    const time = this.formatTimestamp(timeStamp, type);
     const loc = data.loc;
     const mag = data.mag;
     const depth = data.depth;
