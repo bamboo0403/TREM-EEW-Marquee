@@ -230,7 +230,19 @@ class FunctionHandler {
       const intensityDetail = this.GlobalManager.report.message
         ? `各地の震度は『${this.GlobalManager.report.message}』です。`
         : "";
-      return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${this.GlobalManager.intensity_map[currentMaxInt]}です。${intensityDetail}詳しくは気象庁のウェブサイトをご覧ください。`;
+      let warnMsg = "";
+      if (
+        typeof data.warn_message === "string" &&
+        data.warn_message.trim() &&
+        data.warn_message.trim() !== "この地震による津波の心配はありません。"
+      ) {
+        warnMsg = `【警告】${data.warn_message.trim()}。`;
+      }
+      return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${
+        this.GlobalManager.intensity_map[currentMaxInt]
+      }です。${intensityDetail}${
+        warnMsg ? warnMsg : ""
+      }詳しくは気象庁のウェブサイトをご覧ください。`;
     } else if (isTaiwanReport) {
       let maxIntStr = this.GlobalManager.intensity_map[currentMaxInt];
       const match = maxIntStr.match(/^震度([1-4])$/);
