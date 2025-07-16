@@ -175,13 +175,17 @@ class FunctionHandler {
     const list = data.list;
     let currentMaxInt = 0;
     this.GlobalManager.report.message = "";
-    const processList = (listData, isJmaReport) => {
+    const processList = (listData, isJmaReport, isTaiwanReport) => {
       let localMaxInt = 0;
       let tempMessage = "";
       for (const key in listData) {
         if (listData.hasOwnProperty(key)) {
           const keyData = listData[key];
-          if (isJmaReport && keyData.int && keyData.int > localMaxInt) {
+          if (
+            (isJmaReport || isTaiwanReport) &&
+            keyData.int &&
+            keyData.int > localMaxInt
+          ) {
             localMaxInt = keyData.int;
           }
           tempMessage += `${key}：`;
@@ -190,12 +194,21 @@ class FunctionHandler {
             if (townObject.hasOwnProperty(townKey)) {
               const townDetails = townObject[townKey];
               if (isJmaReport) {
-                tempMessage += `${townKey}震度${townDetails.int}、`;
+                tempMessage += `${townKey}${
+                  this.GlobalManager.intensity_map[townDetails.int]
+                }、`;
                 if (townDetails.int > localMaxInt) {
                   localMaxInt = townDetails.int;
                 }
-              } else {
-                tempMessage += `${townKey}${townDetails.int}級、`;
+              } else if (isTaiwanReport) {
+                const intStr =
+                  this.GlobalManager.intensity_map[townDetails.int];
+                const match = intStr.match(/^震度([1-4])$/);
+                if (match) {
+                  tempMessage += `${townKey}${match[1]}級、`;
+                } else {
+                  tempMessage += `${townKey}${intStr.replace("震度", "")}、`;
+                }
               }
             }
           }
@@ -208,16 +221,25 @@ class FunctionHandler {
       }
       return { message: tempMessage, maxInt: localMaxInt };
     };
-    const processed = processList(list, type === "jmaReport");
+    const isJmaReport = type === "jmaReport";
+    const isTaiwanReport = type === "report";
+    const processed = processList(list, isJmaReport, isTaiwanReport);
     this.GlobalManager.report.message = processed.message;
     currentMaxInt = processed.maxInt;
-    if (type === "jmaReport") {
+    if (isJmaReport) {
       const intensityDetail = this.GlobalManager.report.message
         ? `各地の震度は『${this.GlobalManager.report.message}』です。`
         : "";
-      return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${currentMaxInt}です。${intensityDetail}詳しくは気象庁のウェブサイトをご覧ください。`;
-    } else if (type === "report") {
-      return `臺灣時間${time}左右發生規模${mag}地震，震央位於${loc}，深度${depth}公里，各地震度『${this.GlobalManager.report.message}』，更多詳細的地震資訊請參閱中央氣象署網站。`;
+      return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${this.GlobalManager.intensity_map[currentMaxInt]}です。${intensityDetail}詳しくは気象庁のウェブサイトをご覧ください。`;
+    } else if (isTaiwanReport) {
+      let maxIntStr = this.GlobalManager.intensity_map[currentMaxInt];
+      const match = maxIntStr.match(/^震度([1-4])$/);
+      if (match) {
+        maxIntStr = `${match[1]}級`;
+      } else {
+        maxIntStr = maxIntStr.replace("震度", "");
+      }
+      return `臺灣時間${time}左右，${loc}發生規模${mag}地震，深度${depth}公里，最大震度${maxIntStr}，各地震度『${this.GlobalManager.report.message}』，更多詳細的地震資訊請參閱中央氣象署網站。`;
     }
     return `未知類型的報告。時間：${time}`;
   }
