@@ -1,6 +1,7 @@
 # EEW 跑馬燈程式
 
-![image](https://github.com/user-attachments/assets/8942befd-11dd-4f68-82a6-52b3536b1138)
+<img width="1919" height="908" alt="image" src="https://github.com/user-attachments/assets/3c778f07-f323-4350-acdd-e0a49bcec7b8" />
+
 
 此程式採用 TREM 二次創作，最終版權歸屬 **ExpTech Studio 團隊**，請務必詳閱使用規則，且尊重原創作者。  
 如果您要使用此程式，請聯繫 Discord: `miyashooooo` 申請金鑰。此金鑰僅限於本人使用，若經查證與其他人共同使用金鑰，將會直接終止使用權。
