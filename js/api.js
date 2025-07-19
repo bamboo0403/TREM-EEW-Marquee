@@ -236,7 +236,7 @@ class FunctionHandler {
         data.warn_message.trim() &&
         data.warn_message.trim() !== "この地震による津波の心配はありません。"
       ) {
-        warnMsg = `【警告】${data.warn_message.trim()}。`;
+        warnMsg = `${data.warn_message.trim()}、`;
       }
       return `日本時間${time}頃、${loc}を震源とするマグニチュード${mag}の地震が発生しました。震源の深さは${depth}km、最大震度は${
         this.GlobalManager.intensity_map[currentMaxInt]
