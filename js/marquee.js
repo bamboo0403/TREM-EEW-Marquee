@@ -10,8 +10,73 @@ class MarqueeManager {
     this.notice_initial_msg =
       "地震無法有效預測，請勿在聊天室發表、轉載、引用或暗喻任何有關地震預測相關言論或文章，以免觸犯氣象法或是社會秩序維護法，也禁止討論任何政治議題，若有不當留言或名稱將直接刪除或封鎖。";
     this.marqueeCounter = 0;
-    this.counter = 0;
+    this.currentPriority = 0;
+    this.currentType = null;
+    this.marqueeList = ["report", "jmaReport", "notice"];
+    this.marqueeIndex = 0;
     this.setupEventListeners();
+  }
+
+  getPriority(type) {
+    switch (type) {
+      case "eew":
+      case "jmaEEW":
+        return 3;
+      case "tsunami":
+        return 2;
+      case "report":
+      case "jmaReport":
+      case "news":
+        return 1;
+      case "notice":
+      default:
+        return 0;
+    }
+  }
+
+  stopMarquee() {
+    if (this.GlobalManager.newsAlertTimeoutId) {
+      clearTimeout(this.GlobalManager.newsAlertTimeoutId);
+      this.GlobalManager.newsAlertTimeoutId = null;
+    }
+    this.$newsAlert.stop(true, true);
+    this.$containerDiv.stop(true, true);
+    this.resetMarquee();
+    this.$newsAlert.css("display", "none");
+    this.$containerDiv.text("");
+    this.currentPriority = 0;
+    this.currentType = null;
+  }
+
+  getNextMarqueeType() {
+    let list = [];
+    if (this.GlobalManager.news_msg.tw) list.push("report");
+    if (this.GlobalManager.news_msg.jp) list.push("jmaReport");
+    list.push("notice");
+    const listStr = list.join(",");
+    const oldStr = this.marqueeList.join(",");
+    if (listStr !== oldStr) {
+      this.marqueeList = list;
+      this.marqueeIndex = 0;
+    }
+    if (this.marqueeIndex >= this.marqueeList.length) this.marqueeIndex = 0;
+    return this.marqueeList[this.marqueeIndex];
+  }
+
+  playMarqueeLoop() {
+    const type = this.getNextMarqueeType();
+    if (type === "report") {
+      this.news(this.GlobalManager.news_msg.tw, "台灣");
+    } else if (type === "jmaReport") {
+      this.news(this.GlobalManager.news_msg.jp, "日本");
+    } else {
+      this.notice(this.notice_initial_msg);
+    }
+    this.marqueeIndex++;
+  }
+
+  playNextAfterHighPriority() {
+    this.playMarqueeLoop();
   }
 
   animateNews(msg, callback) {
@@ -24,6 +89,11 @@ class MarqueeManager {
   }
 
   eew(eew_msg, type, id) {
+    const priority = this.getPriority("eew");
+    if (priority < this.currentPriority) return;
+    if (priority > this.currentPriority) this.stopMarquee();
+    this.currentPriority = priority;
+    this.currentType = "eew";
     if (this.GlobalManager.check_eew[id]) return;
     this.GlobalManager.check_eew[id] = true;
     this.$containerDiv.text("");
@@ -36,7 +106,6 @@ class MarqueeManager {
         display: "block",
         textAlign: "center",
       });
-      console.log(this.GlobalManager.check_eew[id]);
       setTimeout(() => {
         this.$newsAlert.animate(
           { width: "255px" },
@@ -44,13 +113,212 @@ class MarqueeManager {
         );
         setTimeout(() => {
           this.GlobalManager.check_eew[id] = false;
-          this.notice(this.notice_initial_msg);
+          this.currentPriority = 0;
+          this.currentType = null;
+          this.playNextAfterHighPriority();
         }, 25000);
       }, 2000);
     });
   }
 
+  tsunami(data) {
+    const now = Date.now();
+    if (data.updateTime && now - data.updateTime > 259200000) {
+      return;
+    }
+    const priority = this.getPriority("tsunami");
+    if (priority < this.currentPriority) return;
+    if (priority > this.currentPriority) this.stopMarquee();
+    this.currentPriority = priority;
+    this.currentType = "tsunami";
+    const id = `${data?.earthquakeInfo?.earthquakeId}-${data?.updateTime}`;
+    if (this.GlobalManager.check_tsunami[id]) return;
+    this.GlobalManager.check_tsunami[id] = true;
+    this.$containerDiv.text("");
+    if (data.pageType === "warning" && data.additionalInfo) {
+      const priority = this.getPriority("tsunami");
+      if (priority > this.currentPriority) this.stopMarquee();
+      this.currentPriority = priority;
+      this.currentType = "tsunami";
+      const msg = data.additionalInfo;
+      const endPosition = -msg.length * 29;
+      this.addStyle(endPosition);
+      const pixelsPerSecond = 50;
+      const animationDuration = (msg.length * 11) / pixelsPerSecond;
+      const alertTitle = "日本津波情報";
+      const dummyElement = $("<span>")
+        .css({
+          "font-size": "2rem",
+          "font-weight": "bold",
+          "white-space": "nowrap",
+          padding: "10px 24px",
+          position: "absolute",
+          visibility: "hidden",
+        })
+        .text(alertTitle)
+        .appendTo("body");
+      const alertWidth = `${dummyElement.outerWidth()}px`;
+      dummyElement.remove();
+      this.animateNews(alertTitle, () => {
+        this.$containerDiv.text(msg);
+        this.$containerDiv.css("display", "block");
+        if (this.GlobalManager.newsAlertTimeoutId) {
+          clearTimeout(this.GlobalManager.newsAlertTimeoutId);
+        }
+        this.GlobalManager.newsAlertTimeoutId = setTimeout(() => {
+          this.resetMarquee();
+          this.$containerDiv.css(
+            "animation",
+            `scroll ${animationDuration}s linear`
+          );
+          this.$newsAlert.animate(
+            { width: alertWidth },
+            this.GlobalManager.ANIMATION_DURATION
+          );
+          const onAnimationEnd = () => {
+            this.$containerDiv.off("animationend", onAnimationEnd);
+            this.$containerDiv.text("");
+            setTimeout(() => {
+              this._showTsunamiFlip(data, id, true);
+            }, 1500);
+          };
+          this.$containerDiv.on("animationend", onAnimationEnd);
+        }, 2000);
+      });
+      return;
+    }
+  }
+
+  _showTsunamiFlip(data, id, fromAdditionalInfo) {
+    let maxArrival = null;
+    let maxArrivalStr = "";
+    const list = data.warnings || data.observations || [];
+    if (list.length > 0) {
+      for (const item of list) {
+        if (item.maxArrivalTime) {
+          if (!maxArrival || item.maxArrivalTime > maxArrival) {
+            maxArrival = item.maxArrivalTime;
+          }
+        }
+      }
+      if (maxArrival) {
+        let t = maxArrival;
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+          t = t.slice(5, 16);
+        }
+        maxArrivalStr = `これまでの最大到達時刻：${t}`;
+      }
+    }
+    this.$containerDiv.html(
+      `<div class="tsunami-flip-container"><div class="tsunami-flip-item"></div></div>`
+    );
+    const $flipItem = this.$containerDiv.find(".tsunami-flip-item");
+    function getHeightHtml(heightStr, firstWave, maxArrivalTime) {
+      let firstWaveStr = "";
+      if (firstWave) {
+        let t = firstWave;
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+          t = t.slice(5, 16);
+        }
+        firstWaveStr = `、第一波：${t}`;
+      }
+      let maxArrivalStrLocal = "";
+      if (maxArrivalTime) {
+        let t = maxArrivalTime;
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+          t = t.slice(5, 16);
+        }
+        maxArrivalStrLocal = `、これまでの最大到達時刻：${t}`;
+      }
+      let displayHeightStr = heightStr.replace(
+        /([\d.]+)m(以上)?/g,
+        (match, p1, p2) => `${p1}メーター${p2 ? p2 : ""}`
+      );
+      const match = displayHeightStr.match(
+        /([\d.]+)\s*(メーター|ft|フィート)?/i
+      );
+      if (match) {
+        const value = parseFloat(match[1]);
+        const unit = match[2] || "メーター";
+        let meterValue = value;
+        if (unit.toLowerCase().includes("ft") || unit.includes("フィート")) {
+          meterValue = value * 0.3048;
+        }
+        const rest = displayHeightStr.slice(match[0].length);
+        if (meterValue >= 1) {
+          return `<span style='color:#d32f2f;font-weight:bold;'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}`;
+        } else {
+          return `<span style='color:#1976d2'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}`;
+        }
+      } else {
+        return `<span style='color:#1976d2'>${displayHeightStr}</span>${firstWaveStr}${maxArrivalStrLocal}`;
+      }
+    }
+    const intervalMs = 3500;
+    const self = this;
+    function showWarning(idx) {
+      if (idx >= list.length) {
+        setTimeout(() => {
+          self.GlobalManager.check_tsunami[id] = false;
+          self.currentPriority = 0;
+          self.currentType = null;
+          setTimeout(() => {
+            self.playNextAfterHighPriority();
+          }, 1500);
+        }, 500);
+        return;
+      }
+      const item = list[idx];
+      const area = item.area || item.location || "";
+      $flipItem.removeClass("flip-in");
+      setTimeout(() => {
+        $flipItem.html(
+          `<div>${area} ${getHeightHtml(
+            item.height || "-",
+            item.firstWave,
+            item.maxArrivalTime
+          )}</div>`
+        );
+        $flipItem.addClass("flip-in");
+        setTimeout(() => {
+          showWarning.call(self, idx + 1);
+        }, intervalMs);
+      }, 50);
+    }
+    this.addStyle(-300);
+    if (!fromAdditionalInfo) {
+      this.animateNews("日本津波情報", () => {
+        this.$containerDiv.css({
+          animation: "unset",
+          display: "block",
+          textAlign: "center",
+        });
+        setTimeout(() => {
+          this.$newsAlert.animate(
+            { width: "255px" },
+            this.GlobalManager.ANIMATION_DURATION
+          );
+          showWarning.call(this, 0);
+        }, 2000);
+      });
+    } else {
+      this.$containerDiv.css({
+        animation: "unset",
+        display: "block",
+        textAlign: "center",
+      });
+      setTimeout(() => {
+        showWarning.call(this, 0);
+      }, 0);
+    }
+  }
+
   news(msg, reportType = "台灣") {
+    const priority = this.getPriority("news");
+    if (priority < this.currentPriority) return;
+    if (priority > this.currentPriority) this.stopMarquee();
+    this.currentPriority = priority;
+    this.currentType = "news";
     if (reportType === "台灣") {
       this.GlobalManager.news_msg.tw = msg;
     } else if (reportType === "日本") {
@@ -100,6 +368,11 @@ class MarqueeManager {
   }
 
   notice(notice_msg) {
+    const priority = this.getPriority("notice");
+    if (priority < this.currentPriority) return;
+    if (priority > this.currentPriority) this.stopMarquee();
+    this.currentPriority = priority;
+    this.currentType = "notice";
     const endPosition = -notice_msg.length * 33;
     this.addStyle(endPosition);
     this.resetMarquee();
@@ -115,27 +388,9 @@ class MarqueeManager {
 
   setupEventListeners() {
     this.$containerDiv.on("animationiteration", () => {
-      this.counter++;
-      if (this.counter % 3 === 0) {
-        if (this.GlobalManager.news_msg.tw && this.GlobalManager.news_msg.jp) {
-          const nextType = this.marqueeCounter % 2 === 0 ? "台灣" : "日本";
-          this.news(
-            nextType === "台灣"
-              ? this.GlobalManager.news_msg.tw
-              : this.GlobalManager.news_msg.jp,
-            nextType
-          );
-          this.marqueeCounter++;
-        } else if (this.GlobalManager.news_msg.tw) {
-          this.news(this.GlobalManager.news_msg.tw, "台灣");
-        } else if (this.GlobalManager.news_msg.jp) {
-          this.news(this.GlobalManager.news_msg.jp, "日本");
-        } else {
-          this.notice(this.notice_initial_msg);
-        }
-      } else {
-        this.notice(this.notice_initial_msg);
-      }
+      this.currentPriority = 0;
+      this.currentType = null;
+      this.playMarqueeLoop();
     });
   }
 

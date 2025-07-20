@@ -72,6 +72,7 @@ class GlobalManager {
     };
     this.ANIMATION_DURATION = 200;
     this.check_eew = {};
+    this.check_tsunami = {};
     this.newsAlertTimeoutId = null;
     this.marqueeQueue = [];
     this.isMarqueeRunning = false;

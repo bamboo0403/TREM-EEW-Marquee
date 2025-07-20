@@ -255,6 +255,61 @@ class FunctionHandler {
     }
     return `未知類型的報告。時間：${time}`;
   }
+
+  formatJmaTsunami(data) {
+    let maxArrival = null;
+    const list = data.warnings || data.observations || [];
+    if (list.length > 0) {
+      for (const item of list) {
+        if (item.maxArrivalTime) {
+          if (!maxArrival || item.maxArrivalTime > maxArrival) {
+            maxArrival = item.maxArrivalTime;
+          }
+        }
+      }
+    }
+    let maxArrivalStr = "";
+    if (maxArrival) {
+      let t = maxArrival;
+      if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+        t = t.slice(5, 16);
+      }
+      maxArrivalStr = `これまでの最大到達時刻：${t}`;
+    }
+    const formattedList = list.map((item) => {
+      let displayHeightStr = (item.height || "-").replace(
+        /([\d.]+)m(以上)?/g,
+        (match, p1, p2) => `${p1}メーター${p2 ? p2 : ""}`
+      );
+      let firstWaveStr = "";
+      if (item.firstWave) {
+        let t = item.firstWave;
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+          t = t.slice(5, 16);
+        }
+        firstWaveStr = `、第一波：${t}`;
+      }
+      let maxArrivalStrLocal = "";
+      if (item.maxArrivalTime) {
+        let t = item.maxArrivalTime;
+        if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
+          t = t.slice(5, 16);
+        }
+        maxArrivalStrLocal = `、これまでの最大到達時刻：${t}`;
+      }
+      return {
+        area: item.area || item.location || "",
+        displayHeightStr,
+        firstWaveStr,
+        maxArrivalStrLocal,
+      };
+    });
+    return {
+      additionalInfo: data.additionalInfo || "",
+      maxArrivalStr,
+      formattedList,
+    };
+  }
 }
 
 window.functionHandler = new FunctionHandler(window.GlobalManager);

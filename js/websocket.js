@@ -5,7 +5,7 @@ class WebSocketManager {
     this.Marquee = Marquee;
     this.Station = Station;
     this.wsURL = "wss://eew.bcl666.live/";
-    this.API_KEY = "金鑰貼這裡";
+    this.API_KEY = "bWl5YXNob29vb29fdGVzdAJasper881005";
     this.ws = null;
   }
 
@@ -19,6 +19,7 @@ class WebSocketManager {
       this.sendWebSocketMessage({ type: "jmaEEW", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "report", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "jmaReport", token: this.API_KEY });
+      this.sendWebSocketMessage({ type: "jmaTsunami", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "station", token: this.API_KEY });
     });
     this.ws.addEventListener("error", (event) => {
@@ -78,10 +79,15 @@ class WebSocketManager {
         }, 0);
         break;
       case "jmaEEW":
-        this.Station.on_eew_jp(data);
+        if (data?.type) {
+          this.Station.on_eew_jp(data);
+        }
+        break;
+      case "jmaTsunami":
+        this.Marquee.tsunami(data);
         break;
       default:
-        if (this.Station) {
+        if (this.Station && data?.type) {
           this.Station.on_eew(data);
         }
         break;
