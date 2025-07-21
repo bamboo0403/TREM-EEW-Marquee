@@ -5,7 +5,7 @@ class WebSocketManager {
     this.Marquee = Marquee;
     this.Station = Station;
     this.wsURL = "wss://eew.bcl666.live/";
-    this.API_KEY = "bWl5YXNob29vb29fdGVzdAJasper881005";
+    this.API_KEY = "金鑰貼這裡";
     this.ws = null;
   }
 
@@ -84,8 +84,10 @@ class WebSocketManager {
         }
         break;
       case "jmaTsunami":
-        this.Marquee.tsunami(data);
-        break;
+        if (data.warnings.length) {
+          this.Marquee.tsunami(data);
+          break;
+        }
       default:
         if (this.Station && data?.type) {
           this.Station.on_eew(data);

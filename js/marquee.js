@@ -136,10 +136,6 @@ class MarqueeManager {
     this.GlobalManager.check_tsunami[id] = true;
     this.$containerDiv.text("");
     if (data.pageType === "warning" && data.additionalInfo) {
-      const priority = this.getPriority("tsunami");
-      if (priority > this.currentPriority) this.stopMarquee();
-      this.currentPriority = priority;
-      this.currentType = "tsunami";
       const msg = data.additionalInfo;
       const endPosition = -msg.length * 29;
       this.addStyle(endPosition);
@@ -187,6 +183,7 @@ class MarqueeManager {
       });
       return;
     }
+    this._showTsunamiFlip(data, id, false);
   }
 
   _showTsunamiFlip(data, id, fromAdditionalInfo) {
