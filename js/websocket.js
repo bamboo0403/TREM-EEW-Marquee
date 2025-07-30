@@ -20,7 +20,6 @@ class WebSocketManager {
       this.sendWebSocketMessage({ type: "report", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "jmaReport", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "jmaTsunami", token: this.API_KEY });
-      this.sendWebSocketMessage({ type: "jmaTsunamiTEST", token: this.API_KEY });
       this.sendWebSocketMessage({ type: "station", token: this.API_KEY });
     });
     this.ws.addEventListener("error", (event) => {
@@ -85,7 +84,6 @@ class WebSocketManager {
         }
         break;
       case "jmaTsunami":
-      case "jmaTsunamiTEST":
         if (data?.warnings?.length) {
           this.Marquee.tsunami(data);
           break;
