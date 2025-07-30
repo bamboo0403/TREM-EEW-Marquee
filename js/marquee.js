@@ -122,8 +122,10 @@ class MarqueeManager {
   }
 
   tsunami(data) {
+    console.log("處理津波資料:", data);
     const now = Date.now();
     if (data.updateTime && now - data.updateTime > 259200000) {
+      console.log("津波資料已過期，跳過處理");
       return;
     }
     const priority = this.getPriority("tsunami");
@@ -135,8 +137,11 @@ class MarqueeManager {
     if (this.GlobalManager.check_tsunami[id]) return;
     this.GlobalManager.check_tsunami[id] = true;
     this.$containerDiv.text("");
-    if (data.pageType === "warning" && data.additionalInfo) {
-      const msg = data.additionalInfo;
+
+    // 處理混合頁面類型，優先顯示主要公告
+    if ((data.pageType === "mixed") && (data.additionalInfo || data.mainAnnouncement)) {
+      console.log("顯示津波主要公告:", data.mainAnnouncement || data.additionalInfo);
+      const msg = data.additionalInfo || data.mainAnnouncement;
       const endPosition = -msg.length * 29;
       this.addStyle(endPosition);
       const pixelsPerSecond = 50;
@@ -189,7 +194,11 @@ class MarqueeManager {
   _showTsunamiFlip(data, id, fromAdditionalInfo) {
     let maxArrival = null;
     let maxArrivalStr = "";
-    const list = data.warnings || data.observations || [];
+
+    const observations = data.observations || [];
+    const warnings = data.warnings || [];
+    const list = [...observations, ...warnings];
+
     if (list.length > 0) {
       for (const item of list) {
         if (item.maxArrivalTime) {
@@ -206,19 +215,22 @@ class MarqueeManager {
         maxArrivalStr = `これまでの最大到達時刻：${t}`;
       }
     }
+
     this.$containerDiv.html(
       `<div class="tsunami-flip-container"><div class="tsunami-flip-item"></div></div>`
     );
     const $flipItem = this.$containerDiv.find(".tsunami-flip-item");
-    function getHeightHtml(heightStr, firstWave, maxArrivalTime) {
+
+    function getHeightHtml(heightStr, firstWave, maxArrivalTime, arrivalTime) {
       let firstWaveStr = "";
-      if (firstWave) {
+      if (firstWave && firstWave !== "欠測") {
         let t = firstWave;
         if (/\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?/.test(t)) {
           t = t.slice(5, 16);
         }
         firstWaveStr = `、第一波：${t}`;
       }
+
       let maxArrivalStrLocal = "";
       if (maxArrivalTime) {
         let t = maxArrivalTime;
@@ -227,13 +239,26 @@ class MarqueeManager {
         }
         maxArrivalStrLocal = `、これまでの最大到達時刻：${t}`;
       }
+
+      // 處理到達時間
+      let arrivalTimeStr = "";
+      if (arrivalTime) {
+        if (arrivalTime.includes("到達") || arrivalTime.includes("推測")) {
+          arrivalTimeStr = `、${arrivalTime}`;
+        } else if (/\d{2}日 \d{2}時\d{2}分/.test(arrivalTime) || /\d{2}日 \d{2}:\d{2}/.test(arrivalTime)) {
+          arrivalTimeStr = `、到達予想：${arrivalTime}`;
+        }
+      }
+
       let displayHeightStr = heightStr.replace(
         /([\d.]+)m(以上)?/g,
         (match, p1, p2) => `${p1}メーター${p2 ? p2 : ""}`
       );
+
       const match = displayHeightStr.match(
         /([\d.]+)\s*(メーター|ft|フィート)?/i
       );
+
       if (match) {
         const value = parseFloat(match[1]);
         const unit = match[2] || "メーター";
@@ -242,17 +267,21 @@ class MarqueeManager {
           meterValue = value * 0.3048;
         }
         const rest = displayHeightStr.slice(match[0].length);
+        console.log('meterValue', meterValue);
+
         if (meterValue >= 1) {
-          return `<span style='color:#d32f2f;font-weight:bold;'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}`;
+          return `<span style='color:#d32f2f;font-weight:bold;'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}${arrivalTimeStr}`;
         } else {
-          return `<span style='color:#1976d2'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}`;
+          return `<span style='color:#1976d2'>${match[0]}</span> ${rest}${firstWaveStr}${maxArrivalStrLocal}${arrivalTimeStr}`;
         }
       } else {
-        return `<span style='color:#1976d2'>${displayHeightStr}</span>${firstWaveStr}${maxArrivalStrLocal}`;
+        return `<span style='color:#1976d2'>${displayHeightStr}</span>${firstWaveStr}${maxArrivalStrLocal}${arrivalTimeStr}`;
       }
     }
+
     const intervalMs = 3500;
     const self = this;
+
     function showWarning(idx) {
       if (idx >= list.length) {
         setTimeout(() => {
@@ -265,15 +294,18 @@ class MarqueeManager {
         }, 500);
         return;
       }
+
       const item = list[idx];
       const area = item.area || item.location || "";
+
       $flipItem.removeClass("flip-in");
       setTimeout(() => {
         $flipItem.html(
           `<div>${area} ${getHeightHtml(
             item.height || "-",
             item.firstWave,
-            item.maxArrivalTime
+            item.maxArrivalTime,
+            item.arrivalTime
           )}</div>`
         );
         $flipItem.addClass("flip-in");
@@ -282,6 +314,7 @@ class MarqueeManager {
         }, intervalMs);
       }, 50);
     }
+
     this.addStyle(-300);
     if (!fromAdditionalInfo) {
       this.animateNews("日本津波情報", () => {
